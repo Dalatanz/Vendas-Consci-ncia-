@@ -55,7 +55,7 @@ Opcional:
 | Variável | Uso |
 |----------|-----|
 | `DIRECT_DATABASE_URL` | Reservado para futuros scripts com conexão direta (não obrigatório no código atual). |
-| `DRIVE_MODULE_VIDEO_IDS` | CSV com **7 IDs** de arquivo do Google Drive (módulos 1→7). Cada aula do módulo usa o mesmo vídeo em embed `/preview`. Pasta de referência: [Drive — Venda consciência](https://drive.google.com/drive/folders/169hCDQcHZgAJ8c0M8KcecbOtJMlpAErt). |
+| `DRIVE_MODULE_VIDEO_IDS` | CSV com **7 IDs** (módulos 1→7): **Introdução**, depois **Aula 01 … Aula 06** (trecho `.../file/d/ID/view`). O app tem 7 módulos; se quiser **Aula 07** no último módulo, troque só o **7º** ID pelo da Aula 07. Pasta: [Drive](https://drive.google.com/drive/folders/169hCDQcHZgAJ8c0M8KcecbOtJMlpAErt). |
 
 **Trilha (sequência e vídeos):** com `DRIVE_MODULE_VIDEO_IDS` preenchido, o seed e o script `npm run db:sync-videos` gravam URLs de preview do Drive. **Dentro de cada módulo**, a aula 1 fica liberada; as demais só após **marcar a aula anterior como concluída** (API e UI bloqueiam acesso direto).
 

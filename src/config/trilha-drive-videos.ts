@@ -1,21 +1,21 @@
 /**
  * Vídeos da trilha (Google Drive).
- * Pasta de referência: https://drive.google.com/drive/folders/169hCDQcHZgAJ8c0M8KcecbOtJMlpAErt
+ * Pasta: https://drive.google.com/drive/folders/169hCDQcHZgAJ8c0M8KcecbOtJMlpAErt
  *
- * Para cada módulo (ordem 1–7), informe o ID do arquivo no Drive (trecho .../file/d/ESTE_ID/view).
- * Ordem sugerida: M1 Introducao.mp4, M2 Aula 01 … M7 Aula 06 (Aula 07 pode substituir um deles).
- * Deixe null para usar o vídeo de demonstração (MDN) naquele módulo.
+ * Ordem = **módulo 1 → 7** no banco: Introdução, depois Aula 01 … Aula 06.
+ * (Há também Aula 07 no Drive; o app tem só 7 módulos — troque o **7º** ID na env pelo da
+ * Aula 07 se quiser ela no último módulo em vez da Aula 06.)
  *
- * Em produção prefira a env DRIVE_MODULE_VIDEO_IDS (CSV de 7 IDs) na Vercel.
+ * Em produção use `DRIVE_MODULE_VIDEO_IDS` (CSV, 7 IDs, mesma ordem).
  */
 export const DRIVE_FILE_ID_BY_MODULE_ORDER: (string | null)[] = [
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
+  "18rYoDr0Fy0OtXcIQETf8RyrGx4MEVq3-", // Introducao.mp4
+  "1oCYmHg84kU4NnkYKLUKFcZgiZ0ionrLj", // Aula 01
+  "1avzzC1ZkP0gxLTuc6IoXvt1lb8KL2Yww", // Aula 02
+  "1yZRhH0NveDMMdu3khDPb_PddqH-i323U", // Aula 03
+  "1KXkgS-N8WtcqTdLot6HLcY1ZbTQ5ZqqU", // Aula 04
+  "1vPSf5Ly4ARXYT4jPDrdhNbbZESYrmKaV", // Aula 05
+  "1vjaZA8CRypPzQeo266Utx2Gc_lQ8GFqP", // Aula 06 — substituir por 1cROyjO4ETmzKL8u6n0huf3Ea_hijh9NG (Aula 07) se preferir
 ];
 
 const SAMPLE =
