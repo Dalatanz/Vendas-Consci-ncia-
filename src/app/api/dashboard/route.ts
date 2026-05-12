@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getUserIdOrNull } from "@/lib/session";
 import { levelFromTotalPoints, rankingScore, xpProgressInLevel } from "@/lib/gamification";
 import { AssociatedCompany } from "@/generated/prisma/enums";
+import { ensureDefaultTrailInDb } from "@/lib/trail-default-seed";
 
 const companyLabel: Record<AssociatedCompany, string> = {
   SIMPLIFICA: "Simplifica",
@@ -15,6 +16,8 @@ export async function GET() {
   if (!userId) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
+
+  await ensureDefaultTrailInDb();
 
   const modules = await prisma.courseModule.findMany({
     orderBy: { order: "asc" },

@@ -69,7 +69,7 @@ Arquivo de referência local: copie `.env.example` para `.env` e preencha.
 2. [vercel.com](https://vercel.com) → **Add New → Project** → importe o repositório.
 3. **Root Directory**: raiz do app Next (onde está `package.json` deste projeto).
 4. **Framework Preset**: Next.js (detectado automaticamente).
-5. **Build Command** na Vercel: use **`npm run build:vercel`** (aplica `prisma migrate deploy` em banco **novo** ou com histórico de migrate).  
+5. **Build Command** na Vercel: use **`npm run build:vercel`** (`prisma migrate deploy` + **`prisma db seed`** + `next build`). O seed é idempotente; em banco vazio cria módulos, aulas e recompensas. **Além disso**, na primeira visita à trilha/dashboard o app chama `ensureDefaultTrailInDb()` se ainda não houver módulos — útil se o build usar só `npm run build`.  
    Para CI/local sem migrate (banco já existente só com `db push`), use o padrão **`npm run build`**.
 6. **Install Command**: `npm install` (padrão).
 7. Cadastre as variáveis da tabela acima.

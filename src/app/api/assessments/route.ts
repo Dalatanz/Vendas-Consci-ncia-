@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserIdOrNull } from "@/lib/session";
+import { ensureDefaultTrailInDb } from "@/lib/trail-default-seed";
 
 export async function GET() {
   const userId = await getUserIdOrNull();
   if (!userId) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
+
+  await ensureDefaultTrailInDb();
 
   const modules = await prisma.courseModule.findMany({
     orderBy: { order: "asc" },

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getLessonSequentialLock } from "@/lib/lesson-access";
+import { ensureDefaultTrailInDb } from "@/lib/trail-default-seed";
 
 export type TrailModuleSummary = {
   slug: string;
@@ -11,6 +12,8 @@ export type TrailModuleSummary = {
 };
 
 export async function getTrailModulesForUser(userId: string): Promise<TrailModuleSummary[]> {
+  await ensureDefaultTrailInDb();
+
   const modules = await prisma.courseModule.findMany({
     orderBy: { order: "asc" },
     include: {
@@ -69,6 +72,8 @@ export async function getModuleDetailForUser(
   userId: string,
   slug: string,
 ): Promise<ModuleDetailPayload | null> {
+  await ensureDefaultTrailInDb();
+
   const mod = await prisma.courseModule.findUnique({
     where: { slug },
     include: {

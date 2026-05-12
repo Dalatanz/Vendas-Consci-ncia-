@@ -22,8 +22,9 @@ export default async function TrilhaPage() {
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">
           Aqui você vê a <strong className="font-medium text-zinc-300">lista de módulos</strong>.
           Abra um módulo para ver as aulas em ordem: a primeira já libera; as próximas liberam ao
-          marcar a anterior como concluída no player. No deploy na Vercel o fluxo é o mesmo —
-          basta ter rodado o seed no Postgres e as URLs dos vídeos (Drive ou sync).
+          marcar a anterior como concluída no player. Na primeira visita, a trilha é criada
+          automaticamente no banco se ainda não existir (também no deploy Vercel com{" "}
+          <code className="text-zinc-500">build:vercel</code>).
         </p>
       </div>
 
@@ -31,18 +32,16 @@ export default async function TrilhaPage() {
         <GlassCard className="max-w-2xl border-amber-500/25 bg-amber-500/5">
           <p className="text-sm font-medium text-amber-100/90">Nenhum módulo encontrado</p>
           <p className="mt-2 text-sm text-zinc-400">
-            O banco de dados ainda não tem a trilha cadastrada. Quem administra o projeto precisa
-            rodar o seed <strong>uma vez</strong> apontando para o mesmo Postgres de produção:
+            Isso é incomum: a trilha deveria ser criada sozinha ao carregar esta página. Confira se
+            a variável <strong className="text-zinc-300">DATABASE_URL</strong> na Vercel aponta
+            para o Postgres certo e se o deploy usa <code className="text-zinc-500">npm run build:vercel</code>{" "}
+            (inclui migração + seed). Atualize a página ou faça um novo deploy.
           </p>
-          <pre className="mt-4 overflow-x-auto rounded-lg border border-white/10 bg-black/50 p-3 text-xs text-zinc-300">
-            cd web{"\n"}
-            npx prisma db seed
-          </pre>
           <p className="mt-3 text-xs text-zinc-500">
-            Depois disso, atualize esta página. Se os vídeos do Drive já estiverem no código ou na
-            variável <code className="text-zinc-400">DRIVE_MODULE_VIDEO_IDS</code>, rode também{" "}
-            <code className="text-zinc-400">npm run db:sync-videos</code> para gravar as URLs nas
-            aulas.
+            Opcional na sua máquina (mesmo banco de produção):{" "}
+            <code className="text-zinc-400">cd web &amp;&amp; npx prisma db seed</code> — e{" "}
+            <code className="text-zinc-400">npm run db:sync-videos</code> para gravar URLs do Drive
+            nas aulas.
           </p>
         </GlassCard>
       ) : (
