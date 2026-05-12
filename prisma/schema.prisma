@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AssociatedCompany {
+  SIMPLIFICA
+  SCALE
+  OTHER
+}
+
+enum PointTransactionType {
+  lesson_completed
+  activity_passed
+  event_attendance
+  manual_bonus
+  reward_redeemed
+}
+
+enum RewardCatalogStatus {
+  AVAILABLE
+  LOCKED
+  COMING_SOON
+}
+
+enum RedemptionStatus {
+  COMPLETED
+  PENDING
+}
+
+enum CertificateType {
+  MODULE
+  FINAL
+}
+
+enum CertificateStatus {
+  LOCKED
+  PENDING_APPROVAL
+  ISSUED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  cpf          String   @unique
+  phone        String
+  passwordHash String
+  company      AssociatedCompany
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  pointsWallet      UserPoints?
+  pointTransactions PointTransaction[]
+  lessonProgress    UserLessonProgress[]
+  assessments       UserAssessment[]
+  redemptions       RewardRedemption[]
+  certificates      UserCertificate[]
+}
+
+model UserPoints {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  totalPoints     Int      @default(0)
+  availablePoints Int      @default(0)
+  usedPoints      Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PointTransaction {
+  id          String               @id @default(cuid())
+  userId      String
+  points      Int
+  type        PointTransactionType
+  source      String
+  sourceId    String?
+  description String?
+  createdAt   DateTime             @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@unique([userId, type, sourceId])
+}
+
+model CourseModule {
+  id           String   @id @default(cuid())
+  order        Int      @unique
+  slug         String   @unique
+  title        String
+  description  String
+  thumbnailUrl String?
+  durationMin  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  lessons     Lesson[]
+  assessments Assessment[]
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  moduleId    String
+  order       Int
+  title       String
+  description String?
+  videoUrl    String
+  durationSec Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  module   CourseModule         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress UserLessonProgress[]
+
+  @@unique([moduleId, order])
+}
+
+model UserLessonProgress {
+  id            String    @id @default(cuid())
+  userId        String
+  lessonId      String
+  progressPct   Float     @default(0)
+  currentTimeSec Int      @default(0)
+  completed     Boolean   @default(false)
+  completedAt   DateTime?
+  updatedAt     DateTime  @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model Assessment {
+  id            String   @id @default(cuid())
+  moduleId      String
+  title         String
+  questionCount Int      @default(10)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  module CourseModule      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  attempts UserAssessment[]
+}
+
+model UserAssessment {
+  id            String    @id @default(cuid())
+  userId        String
+  assessmentId  String
+  correctCount  Int
+  scorePct      Float
+  passed        Boolean   @default(false)
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, assessmentId])
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  bannerUrl   String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  active      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Reward {
+  id             String              @id @default(cuid())
+  title          String
+  description    String
+  pointsRequired Int
+  status         RewardCatalogStatus @default(AVAILABLE)
+  imageUrl       String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  redemptions RewardRedemption[]
+}
+
+model RewardRedemption {
+  id          String           @id @default(cuid())
+  userId      String
+  rewardId    String
+  pointsUsed  Int
+  status      RedemptionStatus @default(COMPLETED)
+  redeemedAt  DateTime         @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, rewardId])
+  @@index([userId])
+}
+
+model UserCertificate {
+  id         String            @id @default(cuid())
+  userId     String
+  moduleId   String?
+  type       CertificateType
+  title      String
+  status     CertificateStatus @default(LOCKED)
+  pdfUrl     String?
+  issuedAt   DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
