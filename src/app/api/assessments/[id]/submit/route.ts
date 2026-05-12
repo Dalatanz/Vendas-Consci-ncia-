@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserIdOrNull } from "@/lib/session";
 import { awardActivityPoint } from "@/lib/points-service";
+import { syncUserCertificates } from "@/lib/certificate-service";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -55,6 +56,10 @@ export async function POST(req: Request, ctx: Params) {
   });
 
   const pts = passed ? await awardActivityPoint(userId, id, scorePct) : { awarded: false };
+
+  if (passed) {
+    await syncUserCertificates(userId);
+  }
 
   return NextResponse.json({
     ok: true,

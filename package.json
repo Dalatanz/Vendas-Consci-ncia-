@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "build:vercel": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
     "db:push": "prisma db push",
@@ -23,9 +24,11 @@
     "jose": "^6.2.3",
     "lucide-react": "^1.14.0",
     "next": "16.2.6",
+    "pdf-lib": "^1.17.1",
     "pg": "^8.20.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "resend": "^6.12.3",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },

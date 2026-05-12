@@ -63,7 +63,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "CPF já cadastrado." }, { status: 409 });
     }
     if (email) {
-      const emailTaken = await prisma.user.findUnique({ where: { email } });
+      const emailTaken = await prisma.user.findFirst({ where: { email } });
       if (emailTaken) {
         return NextResponse.json({ error: "E-mail já cadastrado." }, { status: 409 });
       }

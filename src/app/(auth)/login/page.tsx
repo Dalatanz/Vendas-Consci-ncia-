@@ -78,7 +78,7 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 flex flex-col gap-2 text-center text-sm">
-          <Link href="#" className="text-zinc-500 transition hover:text-[var(--uvc-neon)]">
+          <Link href="/esqueci-senha" className="text-zinc-500 transition hover:text-[var(--uvc-neon)]">
             Esqueci minha senha
           </Link>
           <Link href="/cadastro" className="font-medium text-[var(--uvc-neon)] hover:underline">

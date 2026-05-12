@@ -1,5 +1,7 @@
 # Prompt / guia: Supabase + deploy na Vercel
 
+Guia **completo e atualizado** (variáveis, checklist, o que foi fechado no código): veja **`docs/PRODUCAO_VERCEL_SUPABASE.md`**.
+
 Use o texto abaixo como **prompt** para outro assistente ou como **checklist** manual.
 
 ---
@@ -13,7 +15,7 @@ Quero:
 1) Criar um projeto no Supabase (PostgreSQL).
 2) Obter a connection string adequada ao Prisma em ambiente serverless (Vercel): usar o Connection Pooler (porta 6543) com parâmetros compatíveis com PgBouncer. Se o Prisma reclamar de prepared statements, usar a string que a documentação atual do Supabase recomenda para Prisma + pooler.
 3) Aplicar o schema ao banco: a partir da minha máquina, com DATABASE_URL apontando para o Supabase, rodar `npx prisma db push` e depois `npx prisma db seed` (o seed está em prisma/seed.ts e o comando está em prisma.config.ts → migrations.seed).
-4) Fazer deploy na Vercel: importar o repositório GitHub, Framework Preset Next.js, Root Directory na raiz do repo (onde está o package.json), Build Command `npm run build` (o postinstall já roda `prisma generate`), e configurar as Environment Variables DATABASE_URL e JWT_SECRET iguais às de produção.
+4) Fazer deploy na Vercel: importar o repositório GitHub, Framework Preset Next.js, Root Directory na raiz do repo (onde está o package.json), Build Command `npm run build:vercel` na primeira vez (roda `prisma migrate deploy` + `next build`) com banco Postgres vazio; depois pode usar `npm run build` se preferir. Variáveis: DATABASE_URL, JWT_SECRET, NEXT_PUBLIC_APP_URL, RESEND_API_KEY, EMAIL_FROM.
 5) Confirmar que a build na Vercel não tenta conectar ao DB em build-time de forma desnecessária; apenas em runtime nas API routes.
 
 Me dê os passos clicáveis no dashboard do Supabase e da Vercel, o formato exato das variáveis, e alertas comuns (SSL, IPv6, pooler vs direct connection para migrate).

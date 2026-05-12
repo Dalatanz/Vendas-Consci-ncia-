@@ -14,6 +14,7 @@ export default function CadastroPage() {
   const [name, setName] = useState("");
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [company, setCompany] = useState("Simplifica");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
@@ -36,6 +37,7 @@ export default function CadastroPage() {
           name,
           cpf: digitsOnly(cpf),
           phone: digitsOnly(phone),
+          email: email.trim() || undefined,
           company,
           password,
         }),
@@ -84,6 +86,15 @@ export default function CadastroPage() {
             onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
             required
           />
+          <div className="sm:col-span-2">
+            <NeonInput
+              label="E-mail (opcional — para recuperar senha)"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
           <div className="sm:col-span-2">
             <label className="block w-full">
               <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-[var(--uvc-muted)]">
