@@ -1,29 +1,17 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { redirect } from "next/navigation";
 import { BookOpen, ChevronRight, Clock } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
+import { getUserIdOrNull } from "@/lib/session";
+import { getTrailModulesForUser } from "@/lib/trail-modules";
 
-type Mod = {
-  slug: string;
-  title: string;
-  description: string;
-  lessonCount: number;
-  durationMin: number;
-  progressPct: number;
-};
+export default async function TrilhaPage() {
+  const userId = await getUserIdOrNull();
+  if (!userId) {
+    redirect("/login");
+  }
 
-export default function TrilhaPage() {
-  const [modules, setModules] = useState<Mod[]>([]);
-
-  useEffect(() => {
-    fetch("/api/modules")
-      .then((r) => r.json())
-      .then((d) => setModules(d.modules ?? []))
-      .catch(() => setModules([]));
-  }, []);
+  const modules = await getTrailModulesForUser(userId);
 
   return (
     <div className="space-y-8">
@@ -33,20 +21,35 @@ export default function TrilhaPage() {
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">
           Módulos estruturados para evolução contínua em vendas e consciência comercial. Os vídeos
-          serão integrados nesta mesma estrutura — progresso e conclusão alimentam o dashboard e a
-          gamificação.
+          estão nesta estrutura — progresso e conclusão alimentam o dashboard e a gamificação.
         </p>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {modules.map((m, i) => (
-          <motion.div
-            key={m.slug}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-          >
-            <GlassCard className="h-full hover:border-[color-mix(in_srgb,var(--uvc-neon)_35%,transparent)]">
+      {modules.length === 0 ? (
+        <GlassCard className="max-w-2xl border-amber-500/25 bg-amber-500/5">
+          <p className="text-sm font-medium text-amber-100/90">Nenhum módulo encontrado</p>
+          <p className="mt-2 text-sm text-zinc-400">
+            O banco de dados ainda não tem a trilha cadastrada. Quem administra o projeto precisa
+            rodar o seed <strong>uma vez</strong> apontando para o mesmo Postgres de produção:
+          </p>
+          <pre className="mt-4 overflow-x-auto rounded-lg border border-white/10 bg-black/50 p-3 text-xs text-zinc-300">
+            cd web{"\n"}
+            npx prisma db seed
+          </pre>
+          <p className="mt-3 text-xs text-zinc-500">
+            Depois disso, atualize esta página. Se os vídeos do Drive já estiverem no código ou na
+            variável <code className="text-zinc-400">DRIVE_MODULE_VIDEO_IDS</code>, rode também{" "}
+            <code className="text-zinc-400">npm run db:sync-videos</code> para gravar as URLs nas
+            aulas.
+          </p>
+        </GlassCard>
+      ) : (
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {modules.map((m) => (
+            <GlassCard
+              key={m.slug}
+              className="h-full hover:border-[color-mix(in_srgb,var(--uvc-neon)_35%,transparent)]"
+            >
               <div className="flex aspect-video items-center justify-center rounded-xl bg-gradient-to-br from-zinc-900 to-black">
                 <BookOpen className="h-10 w-10 text-[var(--uvc-neon)] opacity-80" />
               </div>
@@ -73,9 +76,9 @@ export default function TrilhaPage() {
                 Abrir módulo <ChevronRight className="h-4 w-4" />
               </Link>
             </GlassCard>
-          </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
