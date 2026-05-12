@@ -1,51 +1,23 @@
-"use client";
-
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { notFound, redirect } from "next/navigation";
 import { ChevronLeft, Lock, Play } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { NeonButton } from "@/components/NeonButton";
+import { getUserIdOrNull } from "@/lib/session";
+import { getModuleDetailForUser } from "@/lib/trail-modules";
 
-type LessonRow = {
-  id: string;
-  order: number;
-  title: string;
-  progressPct: number;
-  completed: boolean;
-  locked: boolean;
-  lockReason: string | null;
-};
+type PageProps = { params: Promise<{ slug: string }> };
 
-export default function ModuloPage() {
-  const params = useParams();
-  const slug = String(params.slug ?? "");
-  const [data, setData] = useState<null | {
-    module: { title: string; description: string; progressPct: number };
-    lessons: LessonRow[];
-  }>(null);
+export default async function ModuloPage({ params }: PageProps) {
+  const { slug } = await params;
+  const userId = await getUserIdOrNull();
+  if (!userId) {
+    redirect("/login");
+  }
 
-  useEffect(() => {
-    if (!slug) return;
-    let cancelled = false;
-    fetch(`/api/modules/${slug}`)
-      .then(async (r) => {
-        if (!r.ok) return null;
-        return r.json();
-      })
-      .then((d) => {
-        if (!cancelled) setData(d);
-      })
-      .catch(() => {
-        if (!cancelled) setData(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [slug]);
-
+  const data = await getModuleDetailForUser(userId, slug);
   if (!data) {
-    return <p className="text-zinc-500">Carregando módulo…</p>;
+    notFound();
   }
 
   return (
@@ -61,6 +33,12 @@ export default function ModuloPage() {
           {data.module.title}
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">{data.module.description}</p>
+        <p className="mt-3 max-w-2xl border-l-2 border-[color-mix(in_srgb,var(--uvc-neon)_50%,transparent)] pl-3 text-xs text-zinc-500">
+          Neste módulo, assista na ordem: a <strong className="text-zinc-300">aula 1</strong> fica
+          liberada; as seguintes liberam depois que você{" "}
+          <strong className="text-zinc-300">marcar a anterior como concluída</strong> (no player).
+          Funciona igual na Vercel — só depende do seed no banco e das URLs dos vídeos.
+        </p>
         <div className="mt-4 h-2 max-w-md overflow-hidden rounded-full bg-zinc-800">
           <div
             className="h-full rounded-full bg-[var(--uvc-neon)]"

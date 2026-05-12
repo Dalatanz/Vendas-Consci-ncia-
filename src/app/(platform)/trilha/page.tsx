@@ -20,8 +20,10 @@ export default async function TrilhaPage() {
           Trilha de desenvolvimento
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-          Módulos estruturados para evolução contínua em vendas e consciência comercial. Os vídeos
-          estão nesta estrutura — progresso e conclusão alimentam o dashboard e a gamificação.
+          Aqui você vê a <strong className="font-medium text-zinc-300">lista de módulos</strong>.
+          Abra um módulo para ver as aulas em ordem: a primeira já libera; as próximas liberam ao
+          marcar a anterior como concluída no player. No deploy na Vercel o fluxo é o mesmo —
+          basta ter rodado o seed no Postgres e as URLs dos vídeos (Drive ou sync).
         </p>
       </div>
 
