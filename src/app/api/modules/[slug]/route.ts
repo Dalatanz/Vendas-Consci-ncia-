@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserIdOrNull } from "@/lib/session";
+import { getLessonSequentialLock } from "@/lib/lesson-access";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -25,9 +26,11 @@ export async function GET(_req: Request, ctx: Params) {
     where: { userId, lesson: { moduleId: mod.id } },
   });
 
-  const lessons = mod.lessons.map((l) => {
+  const lessons = [];
+  for (const l of mod.lessons) {
     const p = progress.find((x) => x.lessonId === l.id);
-    return {
+    const lock = await getLessonSequentialLock(userId, l.id);
+    lessons.push({
       id: l.id,
       order: l.order,
       title: l.title,
@@ -37,8 +40,10 @@ export async function GET(_req: Request, ctx: Params) {
       progressPct: p?.progressPct ?? 0,
       currentTimeSec: p?.currentTimeSec ?? 0,
       completed: p?.completed ?? false,
-    };
-  });
+      locked: !lock.unlocked,
+      lockReason: lock.reason,
+    });
+  }
 
   const done = lessons.filter((l) => l.completed).length;
   const progressPct = lessons.length ? Math.round((done / lessons.length) * 100) : 0;

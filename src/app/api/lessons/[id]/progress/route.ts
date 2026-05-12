@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserIdOrNull } from "@/lib/session";
+import { getLessonSequentialLock } from "@/lib/lesson-access";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -10,6 +11,12 @@ export async function PATCH(req: Request, ctx: Params) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
   const { id } = await ctx.params;
+
+  const lock = await getLessonSequentialLock(userId, id);
+  if (!lock.unlocked) {
+    return NextResponse.json({ error: lock.reason }, { status: 403 });
+  }
+
   const body = await req.json().catch(() => ({}));
   const progressPct = Math.min(100, Math.max(0, Number(body.progressPct ?? 0)));
   const currentTimeSec = Math.max(0, Math.floor(Number(body.currentTimeSec ?? 0)));

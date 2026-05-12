@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserIdOrNull } from "@/lib/session";
+import { getLessonSequentialLock } from "@/lib/lesson-access";
+import { isGoogleDriveEmbedUrl } from "@/config/trilha-drive-videos";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -10,6 +12,11 @@ export async function GET(_req: Request, ctx: Params) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
   const { id } = await ctx.params;
+
+  const lock = await getLessonSequentialLock(userId, id);
+  if (!lock.unlocked) {
+    return NextResponse.json({ error: lock.reason, locked: true }, { status: 403 });
+  }
 
   const lesson = await prisma.lesson.findUnique({
     where: { id },
@@ -34,6 +41,8 @@ export async function GET(_req: Request, ctx: Params) {
     where: { userId_lessonId: { userId, lessonId: id } },
   });
 
+  const embedDrive = isGoogleDriveEmbedUrl(lesson.videoUrl);
+
   return NextResponse.json({
     lesson: {
       id: lesson.id,
@@ -41,6 +50,7 @@ export async function GET(_req: Request, ctx: Params) {
       description: lesson.description,
       videoUrl: lesson.videoUrl,
       durationSec: lesson.durationSec,
+      embedDrive,
     },
     module: {
       slug: lesson.module.slug,

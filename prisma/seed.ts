@@ -1,8 +1,6 @@
 import { prisma } from "../src/lib/prisma";
 import { RewardCatalogStatus } from "../src/generated/prisma/enums";
-
-const SAMPLE_VIDEO =
-  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
+import { lessonVideoUrlForModule } from "../src/config/trilha-drive-videos";
 
 async function main() {
   if ((await prisma.courseModule.count()) === 0) {
@@ -109,7 +107,7 @@ async function main() {
               order: i + 1,
               title: l.title,
               description: l.desc ?? undefined,
-              videoUrl: SAMPLE_VIDEO,
+              videoUrl: lessonVideoUrlForModule(m.order),
               durationSec: 180 + i * 30,
             })),
           },

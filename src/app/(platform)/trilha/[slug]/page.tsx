@@ -3,15 +3,18 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ChevronLeft, Play } from "lucide-react";
+import { ChevronLeft, Lock, Play } from "lucide-react";
 import { GlassCard } from "@/components/GlassCard";
 import { NeonButton } from "@/components/NeonButton";
 
 type LessonRow = {
   id: string;
+  order: number;
   title: string;
   progressPct: number;
   completed: boolean;
+  locked: boolean;
+  lockReason: string | null;
 };
 
 export default function ModuloPage() {
@@ -24,10 +27,21 @@ export default function ModuloPage() {
 
   useEffect(() => {
     if (!slug) return;
+    let cancelled = false;
     fetch(`/api/modules/${slug}`)
-      .then((r) => r.json())
-      .then(setData)
-      .catch(() => setData(null));
+      .then(async (r) => {
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then((d) => {
+        if (!cancelled) setData(d);
+      })
+      .catch(() => {
+        if (!cancelled) setData(null);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   if (!data) {
@@ -57,20 +71,44 @@ export default function ModuloPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {data.lessons.map((l) => (
-          <GlassCard key={l.id} className="flex flex-col justify-between">
+          <GlassCard
+            key={l.id}
+            className={`flex flex-col justify-between ${l.locked ? "opacity-80" : ""}`}
+          >
             <div>
-              <p className="text-xs uppercase tracking-widest text-zinc-500">Aula</p>
+              <p className="text-xs uppercase tracking-widest text-zinc-500">
+                Aula {l.order}
+                {l.locked ? (
+                  <span className="ml-2 inline-flex items-center gap-1 text-amber-400/90">
+                    <Lock className="h-3 w-3" />
+                    Bloqueada
+                  </span>
+                ) : null}
+              </p>
               <h2 className="mt-1 text-lg font-semibold text-white">{l.title}</h2>
               <p className="mt-2 text-xs text-zinc-500">
-                {l.completed ? "Concluída" : `Progresso ${Math.round(l.progressPct)}%`}
+                {l.locked
+                  ? l.lockReason ?? "Conclua a aula anterior."
+                  : l.completed
+                    ? "Concluída"
+                    : `Progresso ${Math.round(l.progressPct)}%`}
               </p>
             </div>
-            <Link href={`/trilha/${slug}/${l.id}`} className="mt-4">
-              <NeonButton type="button" className="w-full gap-2">
-                <Play className="h-4 w-4" />
-                Assistir
-              </NeonButton>
-            </Link>
+            {l.locked ? (
+              <div className="mt-4">
+                <NeonButton type="button" className="w-full gap-2" disabled>
+                  <Lock className="h-4 w-4" />
+                  Assistir
+                </NeonButton>
+              </div>
+            ) : (
+              <Link href={`/trilha/${slug}/${l.id}`} className="mt-4">
+                <NeonButton type="button" className="w-full gap-2">
+                  <Play className="h-4 w-4" />
+                  Assistir
+                </NeonButton>
+              </Link>
+            )}
           </GlassCard>
         ))}
       </div>
